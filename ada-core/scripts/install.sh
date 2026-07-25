@@ -58,7 +58,7 @@ install -d -m 0755 /etc/dbus-1/system.d
 
 # --- python modules ---
 PY_FILES=(
-  identity.py self.py session_memory.py dbus_client.py openclaw_config.py
+  identity.py model.py self.py session_memory.py dbus_client.py openclaw_config.py
   configure_telegram_ada.py restore_self.py wake_ada.py
   supervisor.py api_bridge.py telegram_service.py send_telegram.py
   requirements.txt
@@ -92,10 +92,12 @@ install -m 0644 "${ROOT}/etc/dbus-1/system.d/org.popos.AdaCore.conf" /etc/dbus-1
 
 # --- permissions ---
 chown -R ada:ada /var/lib/ada-core/memory
-if [[ -f /var/lib/ada-core/models/llama-3-8b-instruct-q4_k_m.gguf ]]; then
-  chown ada:ada /var/lib/ada-core/models/llama-3-8b-instruct-q4_k_m.gguf
-  chmod 0640 /var/lib/ada-core/models/llama-3-8b-instruct-q4_k_m.gguf
-fi
+shopt -s nullglob
+for gguf in /var/lib/ada-core/models/*.gguf; do
+  chown ada:ada "${gguf}"
+  chmod 0640 "${gguf}"
+done
+shopt -u nullglob
 chown -R ada:ada /usr/lib/ada-core/venv
 
 # Ada's self file — create only if she does not already have one.

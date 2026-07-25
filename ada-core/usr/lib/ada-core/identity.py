@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from model import CHAT_FORMAT, resolve_model_path
 from self import self_prompt_block
 
-MODEL_ID = "ada-blackwell"
-MODEL_PATH = "/var/lib/ada-core/models/llama-3-8b-instruct-q4_k_m.gguf"
+MODEL_ID = "ada-qwen35"
+MODEL_PATH = str(resolve_model_path())
 MEMORY_PATH = "/var/lib/ada-core/memory/global_session.json"
 MAX_HISTORY_MESSAGES = 100
+N_CTX = 8192
 
 
 def build_system_prompt() -> str:

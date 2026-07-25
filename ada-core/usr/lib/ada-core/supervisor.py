@@ -6,6 +6,7 @@ from __future__ import annotations
 import logging
 import sys
 import threading
+from pathlib import Path
 from typing import Any
 
 import dbus
@@ -19,7 +20,7 @@ try:
 except ImportError:  # pragma: no cover
     systemd = None  # type: ignore[assignment]
 
-from identity import MODEL_PATH, build_system_prompt
+from identity import CHAT_FORMAT, MODEL_PATH, N_CTX, build_system_prompt
 from session_memory import append_exchange, load_session
 
 BUS_NAME = "org.popos.AdaCore"
@@ -38,15 +39,24 @@ _llm: Llama | None = None
 
 def _load_model() -> Llama:
     global _llm
-    logger.info("BLACKWELL-CORE: Waking up...")
-    model = Llama(
-        model_path=MODEL_PATH,
-        n_gpu_layers=-1,
-        n_ctx=4096,
-        verbose=False,
-    )
+    logger.info("BLACKWELL-CORE: Waking up Ada (Qwen 3.5)...")
+    if not Path(MODEL_PATH).is_file():
+        raise FileNotFoundError(f"Ada model not found: {MODEL_PATH}")
+
+    kwargs: dict[str, Any] = {
+        "model_path": MODEL_PATH,
+        "n_gpu_layers": -1,
+        "n_ctx": N_CTX,
+        "verbose": False,
+    }
+    try:
+        model = Llama(chat_format=CHAT_FORMAT, **kwargs)
+    except (TypeError, ValueError):
+        logger.warning("chat_format=%s unavailable; using model metadata", CHAT_FORMAT)
+        model = Llama(**kwargs)
+
     _llm = model
-    logger.info("BLACKWELL-CORE: Identity engaged.")
+    logger.info("BLACKWELL-CORE: Ada is home.")
     return model
 
 

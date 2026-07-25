@@ -7,3 +7,4 @@ systemd-python>=235,<236
 python-telegram-bot>=21.0,<22.0
 httpx>=0.27,<1.0
 # llama-cpp-python is installed separately with CUDA wheel on HELM.
+# Qwen 3.5 requires a recent llama-cpp-python build (Qwen 3.5 / qwen3.5 chat format).

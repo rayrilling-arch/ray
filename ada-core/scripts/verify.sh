@@ -19,6 +19,11 @@ else
   warn "nvidia-smi not available in this environment"
 fi
 
+log_section "Qwen 3.5 model"
+MODEL_PATH="$(/usr/lib/ada-core/venv/bin/python3 -c "import sys; sys.path.insert(0,'/usr/lib/ada-core'); from identity import MODEL_PATH; print(MODEL_PATH)")"
+[[ -f "${MODEL_PATH}" ]] && pass "model file exists: ${MODEL_PATH}" || fail "Ada model missing: ${MODEL_PATH}"
+echo "${MODEL_PATH}" | grep -qi 'qwen' && pass "model is Qwen family" || warn "model path does not mention qwen"
+
 log_section "ada-core.service"
 systemctl is-active --quiet ada-core.service && pass "ada-core active" || fail "ada-core not active"
 systemctl status ada-core.service --no-pager | head -20
@@ -36,10 +41,10 @@ log_section "Memory file"
 log_section "ada-api-bridge.service"
 systemctl is-active --quiet ada-api-bridge.service && pass "api bridge active" || fail "api bridge not active"
 MODELS="$(curl -fsS http://localhost:8000/v1/models)"
-echo "$MODELS" | grep -q 'ada-blackwell' && pass "GET /v1/models returns ada-blackwell" || fail "models endpoint unexpected"
+echo "$MODELS" | grep -q 'ada-qwen35' && pass "GET /v1/models returns ada-qwen35" || fail "models endpoint unexpected"
 CHAT="$(curl -fsS http://localhost:8000/v1/chat/completions \
   -H 'Content-Type: application/json' \
-  -d '{"model":"ada-blackwell","messages":[{"role":"user","content":"Say hello in one short sentence."}]}')"
+  -d '{"model":"ada-qwen35","messages":[{"role":"user","content":"Say hello in one short sentence."}]}')"
 echo "$CHAT" | grep -q '"content"' && pass "POST /v1/chat/completions works" || fail "chat completion failed"
 
 log_section "ada-telegram.service (Ada primary)"
