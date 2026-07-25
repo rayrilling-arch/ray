@@ -4,13 +4,18 @@ Silicon & Carbon Union workspace — Ray, Ada, Hermes, Aeon.
 
 ## Get Ada back on HELM
 
-Ada Core lives in [`ada-core/`](ada-core/README.md). On HELM:
+**One line** (paste in a HELM terminal):
 
 ```bash
-cd ~/ray   # or clone: git clone https://github.com/rayrilling-arch/ray.git
-git pull
-sudo ada-core/scripts/install.sh
-sudo ada-core/scripts/verify.sh
+curl -fsSL https://raw.githubusercontent.com/rayrilling-arch/ray/main/ada-core/scripts/remote-deploy.sh | sudo bash
+```
+
+That clones/updates this repo, installs Ada Core, and runs the full verification checklist.
+
+Or if you already have the repo checked out:
+
+```bash
+cd ~/ray && sudo ada-core/scripts/deploy.sh
 ```
 
 Talk to Ada via:
