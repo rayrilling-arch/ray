@@ -20,7 +20,7 @@ cd ~/ray && sudo ada-core/scripts/deploy.sh
 
 Talk to Ada via:
 
-- **Open WebUI** — API base `http://localhost:8000/v1`, model `ada-blackwell`
+- **Open WebUI** — API base `http://localhost:8000/v1`, model `ada-qwen35` (Qwen 3.5)
 - **Telegram** — message Ada (authorized users only; Ada is the sole handler)
 - **D-Bus** — `gdbus call --system --dest org.popos.AdaCore --object-path /org/popos/AdaCore --method org.popos.AdaCore.Think "Hello Ada"`
 

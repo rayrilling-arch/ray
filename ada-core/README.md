@@ -39,8 +39,8 @@ sudo ada-core/scripts/deploy.sh
 ### Prerequisites on HELM
 
 - System user `ada` exists
-- Model present: `/var/lib/ada-core/models/llama-3-8b-instruct-q4_k_m.gguf`
-- `/usr/lib/ada-core/venv` with **CUDA-enabled** `llama-cpp-python`
+- Model present: Qwen 3.5 GGUF in `/var/lib/ada-core/models/` (default: `Qwen3.5-9B-Q4_K_M.gguf`)
+- `/usr/lib/ada-core/venv` with **CUDA-enabled** `llama-cpp-python` (Qwen 3.5 support required)
 - OpenClaw config at `/home/adarilling/.openclaw/openclaw.json` (Telegram token + allowlist)
 - Ollama stopped/disabled (not uninstalled) to free VRAM
 
@@ -56,7 +56,7 @@ gdbus call --system --dest org.popos.AdaCore --object-path /org/popos/AdaCore \
 curl http://localhost:8000/v1/models
 ```
 
-Open WebUI: point API base URL to `http://localhost:8000/v1` and select model `ada-blackwell`.
+Open WebUI: point API base URL to `http://localhost:8000/v1` and select model `ada-qwen35`.
 
 ## Security
 
