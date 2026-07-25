@@ -19,10 +19,17 @@ Local sovereign cognition stack for Pop!_OS / NVIDIA Blackwell:
 
 ## Deploy on HELM
 
+**One line** (paste in a HELM terminal):
+
 ```bash
-cd /path/to/ray   # this repo
-sudo ada-core/scripts/install.sh
-sudo ada-core/scripts/verify.sh
+curl -fsSL https://raw.githubusercontent.com/rayrilling-arch/ray/main/ada-core/scripts/remote-deploy.sh | sudo bash
+```
+
+Or from an existing checkout:
+
+```bash
+cd ~/ray
+sudo ada-core/scripts/deploy.sh
 ```
 
 `install.sh` timestamp-backs up replaced files under `/var/backups/ada-core/<stamp>/` before overwriting.
