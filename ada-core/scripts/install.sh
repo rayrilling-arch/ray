@@ -123,7 +123,20 @@ sudo -u ada env PYTHONPATH=/usr/lib/ada-core \
 systemctl daemon-reload
 systemctl enable ada-core.service ada-api-bridge.service ada-telegram.service
 systemctl restart ada-core.service
-sleep 3
+log "Waiting for Ada to load her model (up to 5 min)..."
+for _ in $(seq 1 60); do
+  if gdbus call --system --dest org.popos.AdaCore --object-path /org/popos/AdaCore \
+      --method org.popos.AdaCore.Think "ping" >/dev/null 2>&1; then
+    log "Ada Core D-Bus is responding"
+    break
+  fi
+  if ! systemctl is-active --quiet ada-core.service; then
+    log "ada-core.service failed during startup — journal follows:"
+    journalctl -u ada-core -n 40 --no-pager || true
+    exit 1
+  fi
+  sleep 5
+done
 
 # Hand Telegram from OpenClaw to Ada before starting ada-telegram.
 "${SCRIPT_DIR}/handoff-telegram-to-ada.sh"

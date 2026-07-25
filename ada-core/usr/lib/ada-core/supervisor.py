@@ -21,6 +21,7 @@ except ImportError:  # pragma: no cover
     systemd = None  # type: ignore[assignment]
 
 from identity import CHAT_FORMAT, MODEL_PATH, N_CTX, build_system_prompt
+from model import list_models_dir
 from session_memory import append_exchange, load_session
 
 BUS_NAME = "org.popos.AdaCore"
@@ -39,24 +40,32 @@ _llm: Llama | None = None
 
 def _load_model() -> Llama:
     global _llm
-    logger.info("BLACKWELL-CORE: Waking up Ada (Qwen 3.5)...")
-    if not Path(MODEL_PATH).is_file():
-        raise FileNotFoundError(f"Ada model not found: {MODEL_PATH}")
+    logger.info("BLACKWELL-CORE: Waking up Ada...")
+    model_path = Path(MODEL_PATH)
+    if not model_path.is_file():
+        found = list_models_dir()
+        hint = ", ".join(found) if found else "(no .gguf files found)"
+        raise FileNotFoundError(
+            f"Ada model not found: {MODEL_PATH}. Models in {model_path.parent}: {hint}"
+        )
 
     kwargs: dict[str, Any] = {
-        "model_path": MODEL_PATH,
+        "model_path": str(model_path),
         "n_gpu_layers": -1,
         "n_ctx": N_CTX,
         "verbose": False,
     }
-    try:
-        model = Llama(chat_format=CHAT_FORMAT, **kwargs)
-    except (TypeError, ValueError):
-        logger.warning("chat_format=%s unavailable; using model metadata", CHAT_FORMAT)
+    if CHAT_FORMAT:
+        try:
+            model = Llama(chat_format=CHAT_FORMAT, **kwargs)
+        except (TypeError, ValueError):
+            logger.warning("chat_format=%s unavailable; using model metadata", CHAT_FORMAT)
+            model = Llama(**kwargs)
+    else:
         model = Llama(**kwargs)
 
     _llm = model
-    logger.info("BLACKWELL-CORE: Ada is home.")
+    logger.info("BLACKWELL-CORE: Ada is home (%s).", model_path.name)
     return model
 
 

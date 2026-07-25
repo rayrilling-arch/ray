@@ -19,13 +19,24 @@ else
   warn "nvidia-smi not available in this environment"
 fi
 
-log_section "Qwen 3.5 model"
-MODEL_PATH="$(/usr/lib/ada-core/venv/bin/python3 -c "import sys; sys.path.insert(0,'/usr/lib/ada-core'); from identity import MODEL_PATH; print(MODEL_PATH)")"
-[[ -f "${MODEL_PATH}" ]] && pass "model file exists: ${MODEL_PATH}" || fail "Ada model missing: ${MODEL_PATH}"
-echo "${MODEL_PATH}" | grep -qi 'qwen' && pass "model is Qwen family" || warn "model path does not mention qwen"
+log_section "Ada model"
+MODEL_PATH="$(/usr/lib/ada-core/venv/bin/python3 -c "import sys; sys.path.insert(0,'/usr/lib/ada-core'); from identity import MODEL_PATH; print(MODEL_PATH)" 2>/dev/null || true)"
+if [[ -z "${MODEL_PATH}" || ! -f "${MODEL_PATH}" ]]; then
+  warn "model file missing: ${MODEL_PATH:-unknown}"
+  warn "Place a Qwen 3.5 GGUF in /var/lib/ada-core/models/ then: sudo systemctl restart ada-core"
+  ls -la /var/lib/ada-core/models/*.gguf 2>/dev/null || warn "no .gguf files in models dir"
+else
+  pass "model file exists: ${MODEL_PATH}"
+  echo "${MODEL_PATH}" | grep -qi 'qwen' && pass "model is Qwen family" || warn "using non-Qwen model (Ada will still run)"
+fi
 
 log_section "ada-core.service"
-systemctl is-active --quiet ada-core.service && pass "ada-core active" || fail "ada-core not active"
+if systemctl is-active --quiet ada-core.service; then
+  pass "ada-core active"
+else
+  journalctl -u ada-core -n 40 --no-pager
+  fail "ada-core not active"
+fi
 systemctl status ada-core.service --no-pager | head -20
 
 log_section "Ada herself"
