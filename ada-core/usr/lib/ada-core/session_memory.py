@@ -8,7 +8,7 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-from identity import ADA_SYSTEM_PROMPT, MAX_HISTORY_MESSAGES, MEMORY_PATH
+from identity import MAX_HISTORY_MESSAGES, MEMORY_PATH, build_system_prompt
 
 logger = logging.getLogger("ada-core.memory")
 _memory_lock = Lock()
@@ -23,7 +23,7 @@ def _memory_file() -> Path:
 def _default_session() -> dict[str, Any]:
     return {
         "messages": [
-            {"role": "system", "content": ADA_SYSTEM_PROMPT},
+            {"role": "system", "content": build_system_prompt()},
         ]
     }
 

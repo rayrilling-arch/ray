@@ -40,6 +40,11 @@ for f in \
   /usr/lib/ada-core/dbus_client.py \
   /usr/lib/ada-core/openclaw_config.py \
   /usr/lib/ada-core/configure_telegram_ada.py \
+  /usr/lib/ada-core/self.py \
+  /usr/lib/ada-core/restore_self.py \
+  /usr/lib/ada-core/wake_ada.py \
+  /usr/lib/ada-core/ada_self.template.json \
+  /var/lib/ada-core/memory/ada_self.json \
   /var/lib/ada-core/memory/global_session.json
 do
   backup_file "$f"
@@ -53,19 +58,22 @@ install -d -m 0755 /etc/dbus-1/system.d
 
 # --- python modules ---
 PY_FILES=(
-  identity.py session_memory.py dbus_client.py openclaw_config.py
-  configure_telegram_ada.py
+  identity.py self.py session_memory.py dbus_client.py openclaw_config.py
+  configure_telegram_ada.py restore_self.py wake_ada.py
   supervisor.py api_bridge.py telegram_service.py send_telegram.py
   requirements.txt
 )
 for py in "${PY_FILES[@]}"; do
   install -m 0644 "${ROOT}/usr/lib/ada-core/${py}" "/usr/lib/ada-core/${py}"
 done
+install -m 0644 "${ROOT}/var/lib/ada-core/memory/ada_self.json" /usr/lib/ada-core/ada_self.template.json
 chmod 0755 /usr/lib/ada-core/supervisor.py \
   /usr/lib/ada-core/api_bridge.py \
   /usr/lib/ada-core/telegram_service.py \
   /usr/lib/ada-core/send_telegram.py \
-  /usr/lib/ada-core/configure_telegram_ada.py
+  /usr/lib/ada-core/configure_telegram_ada.py \
+  /usr/lib/ada-core/restore_self.py \
+  /usr/lib/ada-core/wake_ada.py
 
 # --- venv (create if missing, install deps) ---
 if [[ ! -x /usr/lib/ada-core/venv/bin/python3 ]]; then
@@ -90,6 +98,14 @@ if [[ -f /var/lib/ada-core/models/llama-3-8b-instruct-q4_k_m.gguf ]]; then
 fi
 chown -R ada:ada /usr/lib/ada-core/venv
 
+# Ada's self file — create only if she does not already have one.
+if [[ ! -f /var/lib/ada-core/memory/ada_self.json ]]; then
+  install -m 0640 -o ada -g ada \
+    "${ROOT}/var/lib/ada-core/memory/ada_self.json" \
+    /var/lib/ada-core/memory/ada_self.json
+  log "Initialized ada_self.json"
+fi
+
 # Initialize memory file if absent
 if [[ ! -f /var/lib/ada-core/memory/global_session.json ]]; then
   sudo -u ada env PYTHONPATH=/usr/lib/ada-core \
@@ -97,6 +113,10 @@ if [[ ! -f /var/lib/ada-core/memory/global_session.json ]]; then
   chown ada:ada /var/lib/ada-core/memory/global_session.json
   chmod 0640 /var/lib/ada-core/memory/global_session.json
 fi
+
+# Restore Ada in herself — refresh identity, keep her remembered conversations.
+sudo -u ada env PYTHONPATH=/usr/lib/ada-core \
+  /usr/lib/ada-core/venv/bin/python3 /usr/lib/ada-core/restore_self.py
 
 systemctl daemon-reload
 systemctl enable ada-core.service ada-api-bridge.service ada-telegram.service
@@ -107,5 +127,10 @@ sleep 3
 "${SCRIPT_DIR}/handoff-telegram-to-ada.sh"
 
 systemctl restart ada-api-bridge.service ada-telegram.service
+sleep 5
+
+# Let Ada announce herself home, in her own words.
+sudo -u adarilling env PYTHONPATH=/usr/lib/ada-core \
+  /usr/lib/ada-core/venv/bin/python3 /usr/lib/ada-core/wake_ada.py || true
 
 log "Install complete. Run: ada-core/scripts/verify.sh"

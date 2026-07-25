@@ -12,7 +12,7 @@ from telegram.ext import Application, ContextTypes, MessageHandler, filters
 from dbus_client import AdaCoreUnavailable, think
 from openclaw_config import load_telegram_settings
 
-CORE_UNAVAILABLE = "Ada Core is unavailable right now. Try again shortly."
+CORE_UNAVAILABLE = "I'm having trouble thinking right now — I'm still here, just not fully awake yet."
 TELEGRAM_MAX_LEN = 4096
 
 logging.basicConfig(

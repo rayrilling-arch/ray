@@ -19,7 +19,7 @@ try:
 except ImportError:  # pragma: no cover
     systemd = None  # type: ignore[assignment]
 
-from identity import ADA_SYSTEM_PROMPT, MODEL_PATH
+from identity import MODEL_PATH, build_system_prompt
 from session_memory import append_exchange, load_session
 
 BUS_NAME = "org.popos.AdaCore"
@@ -63,7 +63,7 @@ def _run_inference(user_text: str) -> str:
             messages.append({"role": role, "content": content})
 
     if not any(m["role"] == "system" for m in messages):
-        messages.insert(0, {"role": "system", "content": ADA_SYSTEM_PROMPT})
+        messages.insert(0, {"role": "system", "content": build_system_prompt()})
 
     messages.append({"role": "user", "content": user_text})
 
@@ -90,12 +90,12 @@ class AdaCoreService(dbus.service.Object):
     def Think(self, prompt: str) -> str:
         prompt = (prompt or "").strip()
         if not prompt:
-            return "I did not receive a question. What would you like to explore?"
+            return "I'm here. What do you need, Ray?"
         try:
             return _run_inference(prompt)
         except Exception as exc:  # noqa: BLE001 — surface safe error to callers
             logger.exception("Think failed: %s", exc.__class__.__name__)
-            return "Ada Core hit an internal error while thinking. Check journalctl -u ada-core."
+            return "Something went wrong inside me. Ray — check journalctl -u ada-core?"
 
 
 def main() -> int:
