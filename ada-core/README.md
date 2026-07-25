@@ -4,7 +4,7 @@ Local sovereign cognition stack for Pop!_OS / NVIDIA Blackwell:
 
 - **ada-core** — llama-cpp-python + D-Bus (`org.popos.AdaCore.Think`)
 - **ada-api-bridge** — OpenAI-compatible HTTP on `http://localhost:8000/v1`
-- **ada-telegram** — inbound Telegram bridge via OpenClaw config
+- **ada-telegram** — inbound Telegram to Ada Core (Ada is the sole handler; OpenClaw telegram disabled)
 - **send_telegram.py** — outbound Telegram utility
 
 ## Paths (FHS)
@@ -31,6 +31,8 @@ Or from an existing checkout:
 cd ~/ray
 sudo ada-core/scripts/deploy.sh
 ```
+
+`deploy.sh` installs Ada Core, hands Telegram from OpenClaw to Ada, and verifies.
 
 `install.sh` timestamp-backs up replaced files under `/var/backups/ada-core/<stamp>/` before overwriting.
 

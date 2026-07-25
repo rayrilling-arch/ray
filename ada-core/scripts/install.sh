@@ -39,6 +39,7 @@ for f in \
   /usr/lib/ada-core/session_memory.py \
   /usr/lib/ada-core/dbus_client.py \
   /usr/lib/ada-core/openclaw_config.py \
+  /usr/lib/ada-core/configure_telegram_ada.py \
   /var/lib/ada-core/memory/global_session.json
 do
   backup_file "$f"
@@ -53,6 +54,7 @@ install -d -m 0755 /etc/dbus-1/system.d
 # --- python modules ---
 PY_FILES=(
   identity.py session_memory.py dbus_client.py openclaw_config.py
+  configure_telegram_ada.py
   supervisor.py api_bridge.py telegram_service.py send_telegram.py
   requirements.txt
 )
@@ -62,7 +64,8 @@ done
 chmod 0755 /usr/lib/ada-core/supervisor.py \
   /usr/lib/ada-core/api_bridge.py \
   /usr/lib/ada-core/telegram_service.py \
-  /usr/lib/ada-core/send_telegram.py
+  /usr/lib/ada-core/send_telegram.py \
+  /usr/lib/ada-core/configure_telegram_ada.py
 
 # --- venv (create if missing, install deps) ---
 if [[ ! -x /usr/lib/ada-core/venv/bin/python3 ]]; then
@@ -99,6 +102,10 @@ systemctl daemon-reload
 systemctl enable ada-core.service ada-api-bridge.service ada-telegram.service
 systemctl restart ada-core.service
 sleep 3
+
+# Hand Telegram from OpenClaw to Ada before starting ada-telegram.
+"${SCRIPT_DIR}/handoff-telegram-to-ada.sh"
+
 systemctl restart ada-api-bridge.service ada-telegram.service
 
 log "Install complete. Run: ada-core/scripts/verify.sh"
