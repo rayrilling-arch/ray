@@ -1,0 +1,19 @@
+[Unit]
+Description=Ada Core — local sovereign cognition (llama-cpp + D-Bus)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=ada
+Group=ada
+WorkingDirectory=/usr/lib/ada-core
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/lib/ada-core/venv/bin/python3 /usr/lib/ada-core/supervisor.py
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=300
+# WatchdogSec intentionally omitted until supervisor sends WATCHDOG=1 pings.
+
+[Install]
+WantedBy=multi-user.target
