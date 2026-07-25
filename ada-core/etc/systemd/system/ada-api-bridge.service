@@ -1,0 +1,18 @@
+[Unit]
+Description=Ada API Bridge — OpenAI-compatible HTTP front-end for Ada Core
+After=network.target ada-core.service
+Requires=ada-core.service
+
+[Service]
+Type=simple
+User=ada
+Group=ada
+WorkingDirectory=/usr/lib/ada-core
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/lib/ada-core/venv/bin/python3 /usr/lib/ada-core/api_bridge.py
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=60
+
+[Install]
+WantedBy=multi-user.target
