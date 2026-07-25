@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Talk to Ada from HELM.
+#   hi-ada              interactive chat
+#   hi-ada Hi Ada       single message
+set -euo pipefail
+
+PYTHON="/usr/lib/ada-core/venv/bin/python3"
+SCRIPT="/usr/lib/ada-core/say_to_ada.py"
+
+if [[ ! -x "${PYTHON}" || ! -f "${SCRIPT}" ]]; then
+  echo "Ada Core not installed. Run: sudo ada-core/scripts/deploy.sh" >&2
+  exit 1
+fi
+
+exec env PYTHONPATH=/usr/lib/ada-core "${PYTHON}" "${SCRIPT}" "$@"

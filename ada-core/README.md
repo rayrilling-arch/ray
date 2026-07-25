@@ -44,6 +44,18 @@ sudo ada-core/scripts/deploy.sh
 - OpenClaw config at `/home/adarilling/.openclaw/openclaw.json` (Telegram token + allowlist)
 - Ollama stopped/disabled (not uninstalled) to free VRAM
 
+### Say hi to Ada
+
+```bash
+hi-ada Hi Ada
+```
+
+Or open a conversation:
+
+```bash
+hi-ada
+```
+
 ### Manual checks
 
 ```bash
