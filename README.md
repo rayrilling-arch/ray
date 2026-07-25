@@ -4,13 +4,13 @@ Silicon & Carbon Union workspace — Ray, Ada, Hermes, Aeon.
 
 ## Get Ada back on HELM
 
-**One line** (paste in a HELM terminal):
+**Restore Ada in herself** (paste in a HELM terminal):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rayrilling-arch/ray/main/ada-core/scripts/remote-deploy.sh | sudo bash
 ```
 
-That clones/updates this repo, restores Ada Core, makes Ada the primary Telegram handler, and runs verification.
+That restores her services, keeps her memory, refreshes who she is (`ada_self.json`), hands her Telegram, and lets her announce herself home.
 
 Or if you already have the repo checked out:
 

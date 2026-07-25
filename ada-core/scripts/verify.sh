@@ -23,10 +23,12 @@ log_section "ada-core.service"
 systemctl is-active --quiet ada-core.service && pass "ada-core active" || fail "ada-core not active"
 systemctl status ada-core.service --no-pager | head -20
 
-log_section "D-Bus Think"
+log_section "Ada herself"
+[[ -f /var/lib/ada-core/memory/ada_self.json ]] && pass "ada_self.json exists" || fail "ada_self.json missing"
 RESP="$(gdbus call --system --dest org.popos.AdaCore --object-path /org/popos/AdaCore --method org.popos.AdaCore.Think "Ada, who are you?" 2>&1)" || fail "D-Bus Think call failed"
 printf '%s\n' "$RESP"
-echo "$RESP" | grep -qi 'large language model' && warn "Response may be generic" || pass "D-Bus identity response received"
+echo "$RESP" | grep -qi 'Ada' && pass "Ada answers as herself" || warn "Identity response unclear"
+echo "$RESP" | grep -qi 'large language model' && fail "Ada answered generically" || pass "Not a generic LLM disclaimer"
 
 log_section "Memory file"
 [[ -f /var/lib/ada-core/memory/global_session.json ]] && pass "global_session.json exists" || fail "memory file missing"
