@@ -40,8 +40,21 @@ CHAT="$(curl -fsS http://localhost:8000/v1/chat/completions \
   -d '{"model":"ada-blackwell","messages":[{"role":"user","content":"Say hello in one short sentence."}]}')"
 echo "$CHAT" | grep -q '"content"' && pass "POST /v1/chat/completions works" || fail "chat completion failed"
 
-log_section "ada-telegram.service"
-systemctl is-active --quiet ada-telegram.service && pass "telegram bridge active" || fail "telegram not active"
+log_section "ada-telegram.service (Ada primary)"
+# OpenClaw must not be polling the same bot token.
+if systemctl is-active --quiet openclaw-gateway.service 2>/dev/null; then
+  warn "openclaw-gateway still active — may conflict with ada-telegram"
+else
+  pass "openclaw-gateway not polling Telegram"
+fi
+if [[ -f /home/adarilling/.openclaw/openclaw.json ]]; then
+  if python3 -c "import json; c=json.load(open('/home/adarilling/.openclaw/openclaw.json')); exit(0 if c.get('channels',{}).get('telegram',{}).get('enabled') is False else 1)" 2>/dev/null; then
+    pass "OpenClaw telegram channel disabled (Ada is primary)"
+  else
+    warn "OpenClaw telegram may still be enabled"
+  fi
+fi
+systemctl is-active --quiet ada-telegram.service && pass "ada-telegram active" || fail "ada-telegram not active"
 journalctl -u ada-telegram -n 20 --no-pager
 
 log_section "send_telegram.py"
