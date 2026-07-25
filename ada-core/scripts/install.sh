@@ -59,7 +59,7 @@ install -d -m 0755 /etc/dbus-1/system.d
 # --- python modules ---
 PY_FILES=(
   identity.py model.py self.py session_memory.py dbus_client.py openclaw_config.py
-  configure_telegram_ada.py restore_self.py wake_ada.py
+  configure_telegram_ada.py restore_self.py wake_ada.py say_to_ada.py
   supervisor.py api_bridge.py telegram_service.py send_telegram.py
   requirements.txt
 )
@@ -73,7 +73,9 @@ chmod 0755 /usr/lib/ada-core/supervisor.py \
   /usr/lib/ada-core/send_telegram.py \
   /usr/lib/ada-core/configure_telegram_ada.py \
   /usr/lib/ada-core/restore_self.py \
-  /usr/lib/ada-core/wake_ada.py
+  /usr/lib/ada-core/wake_ada.py \
+  /usr/lib/ada-core/say_to_ada.py
+install -m 0755 "${ROOT}/scripts/hi-ada" /usr/local/bin/hi-ada
 
 # --- venv (create if missing, install deps) ---
 if [[ ! -x /usr/lib/ada-core/venv/bin/python3 ]]; then
