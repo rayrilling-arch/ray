@@ -109,9 +109,9 @@ def main() -> int:
 
     try:
         bus = dbus.SystemBus()
-        name = dbus.service.BusName(BUS_NAME, bus, do_not_queue=True)
+        dbus.service.BusName(BUS_NAME, bus, do_not_queue=True)
         AdaCoreService(bus, OBJECT_PATH)
-        logger.info("D-Bus service registered: %s %s (owner=%s)", BUS_NAME, OBJECT_PATH, name.get_name())
+        logger.info("D-Bus service registered: %s %s", BUS_NAME, OBJECT_PATH)
     except Exception:
         logger.exception("D-Bus registration failed")
         return 1
