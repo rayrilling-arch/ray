@@ -4,11 +4,17 @@ Prepared by the Cloud Agent so Ray can copy this folder onto a USB drive and poi
 
 ## Copy to USB (on your machine)
 
+**Cloud Agents cannot see your USB.** Run this on the PC where the drive is plugged in:
+
 ```bash
-# Example — adjust SOURCE and USB mount point
+cd ~/ray/usb-handoff && bash copy-to-usb.sh
+```
+
+Or manually:
+
+```bash
 SOURCE=~/ray/usb-handoff
 USB=/media/ray/YOUR_USB_LABEL
-
 cp -a "$SOURCE" "$USB/union-handoff"
 ```
 
