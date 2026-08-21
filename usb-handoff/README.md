@@ -58,7 +58,8 @@ union-handoff/
 └── vessel/
     ├── DIRECTIONS.md         ← full vessel architecture (Architect)
     ├── vessel_charter.json   ← Ada spirit + company autonomy bounds
-    └── BUILD_PHASES.md       ← phased implementation plan
+    ├── BUILD_PHASES.md       ← phased implementation plan
+    └── HISTORY.md            ← timeline: history now, cloud entity next
 ```
 
 ## Note
