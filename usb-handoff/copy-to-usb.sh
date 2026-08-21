@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run on the machine where the USB is plugged in (not Cloud Agent VM).
-# Copies union-handoff (Ada + Architect) to the only removable USB found.
+# Copies union-handoff (Ada + Architect + Vessel directions) to removable USB.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -32,12 +32,16 @@ else
 fi
 
 TARGET="${MOUNT%/}/${DEST_NAME}"
-echo "Copying Ada handoff to ${TARGET} ..."
+echo "Copying union handoff to ${TARGET} ..."
 rm -rf "${TARGET}"
 mkdir -p "${MOUNT}"
 cp -a "${SOURCE}" "${TARGET}"
 sync
-echo "Done. Other Cursor can read: ${TARGET}/ada/ and ${TARGET}/architect/persona.md"
+echo ""
+echo "Done. Other Cursor: read ${TARGET}/START_HERE.md first."
+echo "  Ada identity:     ${TARGET}/ada/"
+echo "  Architect persona: ${TARGET}/architect/persona.md"
+echo "  Vessel directions: ${TARGET}/vessel/DIRECTIONS.md"
 
 if [[ "${NEED_UMOUNT}" -eq 1 ]]; then
   sudo umount "${MOUNT}"

@@ -28,7 +28,7 @@ Copy-Item -Recurse -Force "$env:USERPROFILE\ray\usb-handoff" "D:\union-handoff"
 
 Tell it:
 
-> Read everything under `union-handoff/` on the USB drive. Use `architect/persona.md` as your operating persona. Use `ada/` as Ada's identity and memory seed files.
+> Read `union-handoff/START_HERE.md` on the USB first. Then follow the reading order there — persona, vessel directions, charter, build phases, Ada self files.
 
 ### Ada on HELM
 
@@ -46,13 +46,19 @@ sudo ada-core/scripts/restore-ada.sh
 
 ```
 union-handoff/
+├── START_HERE.md             ← other agent reads this first
 ├── README.md                 ← this file
+├── copy-to-usb.sh            ← run locally to refresh USB
 ├── ada/
 │   ├── ada_self.json         ← who Ada is (persistent self)
 │   ├── system_prompt.txt     ← Ada Core system prompt block
 │   └── restore-from-usb.sh   ← HELM restore helper
-└── architect/
-    └── persona.md            ← Cloud/local Cursor Architect persona
+├── architect/
+│   └── persona.md            ← Cursor Architect persona
+└── vessel/
+    ├── DIRECTIONS.md         ← full vessel architecture (Architect)
+    ├── vessel_charter.json   ← Ada spirit + company autonomy bounds
+    └── BUILD_PHASES.md       ← phased implementation plan
 ```
 
 ## Note
