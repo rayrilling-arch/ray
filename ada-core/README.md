@@ -77,7 +77,17 @@ Open WebUI: point API base URL to `http://localhost:8000/v1` and select model `a
 
 ## Troubleshooting
 
-### Quick diagnosis (run on HELM)
+### Full check (run this first on HELM)
+
+```bash
+sudo ada-check-everything.sh
+# or from repo:
+bash ada-core/scripts/check-everything.sh
+```
+
+Runs: Ada Core doctor → OpenClaw plugin audit → full stack test.
+
+### Quick diagnosis
 
 ```bash
 bash ada-core/scripts/diagnose.sh
