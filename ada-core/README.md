@@ -79,13 +79,23 @@ Open WebUI: point API base URL to `http://localhost:8000/v1` and select model `a
 
 ### Full check (run this first on HELM)
 
+**One line** (fixes git permission issues, no local checkout needed):
+
 ```bash
-sudo ada-check-everything.sh
-# or from repo:
-bash ada-core/scripts/check-everything.sh
+curl -fsSL https://raw.githubusercontent.com/rayrilling-arch/ray/cursor/ada-diagnose-fix-4376/ada-core/scripts/remote-repair.sh | sudo bash
 ```
 
-Runs: Ada Core doctor → OpenClaw plugin audit → full stack test.
+Or from an existing repo (fix `.git` ownership if fetch fails):
+
+```bash
+sudo chown -R adarilling:adarilling ~/ray
+cd ~/ray && git fetch origin cursor/ada-diagnose-fix-4376 && git checkout cursor/ada-diagnose-fix-4376
+sudo ~/ray/ada-core/scripts/repair-ada-core.sh
+sudo ~/ray/ada-core/scripts/fix-openclaw-ada.sh
+bash ~/ray/ada-core/scripts/check-everything.sh
+```
+
+After `install.sh`, shortcuts exist: `sudo ada-repair-core.sh`, `sudo ada-fix-openclaw.sh`, `sudo ada-check-everything.sh`
 
 ### Quick diagnosis
 
