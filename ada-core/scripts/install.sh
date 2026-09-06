@@ -62,7 +62,7 @@ install -d -m 0755 /etc/dbus-1/system.d
 # --- python modules ---
 PY_FILES=(
   identity.py model.py self.py session_memory.py dbus_client.py openclaw_config.py openclaw_routing.py openclaw_audit.py
-  telegram_api.py audit_openclaw.py configure_telegram_ada.py restore_self.py wake_ada.py say_to_ada.py
+  audit_openclaw.py ada_core_doctor.py configure_telegram_ada.py restore_self.py wake_ada.py say_to_ada.py
   supervisor.py api_bridge.py telegram_service.py telegram_api.py send_telegram.py
   requirements.txt
 )

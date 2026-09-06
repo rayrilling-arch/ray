@@ -83,6 +83,23 @@ Open WebUI: point API base URL to `http://localhost:8000/v1` and select model `a
 bash ada-core/scripts/diagnose.sh
 ```
 
+### TUI / hi-ada / everything fails
+
+If **hi-ada** fails, Ada Core is down — OpenClaw web/TUI cannot work either.
+
+```bash
+sudo ada-core/scripts/repair-ada-core.sh
+```
+
+Or diagnose only:
+
+```bash
+python3 /usr/lib/ada-core/ada_core_doctor.py
+python3 /usr/lib/ada-core/ada_core_doctor.py --load-test   # slow: loads model
+```
+
+Common causes: Ollama holding GPU, missing GGUF, missing `llama-cpp-python` in venv.
+
 ### Still no response?
 
 Run the full stack test on HELM — it isolates **each layer**:
