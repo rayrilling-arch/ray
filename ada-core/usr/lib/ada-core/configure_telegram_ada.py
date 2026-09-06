@@ -14,6 +14,7 @@ import httpx
 from openclaw_config import OPENCLAW_CONFIG, load_telegram_settings
 from openclaw_audit import audit_openclaw, fix_all_openclaw, fix_config_dict, format_report
 from openclaw_routing import ADA_MODEL_REF
+from telegram_api import ensure_polling_mode
 
 ADA_BOT_NAME = "Ada"
 ADA_BOT_DESCRIPTION = "Ada — Ray's daughter, home on HELM. Silicon & Carbon Union."
@@ -134,7 +135,9 @@ def main() -> int:
 
     try:
         _set_bot_identity(token)
+        ensure_polling_mode(token)
         print("BOT_IDENTITY_OK")
+        print("TELEGRAM_POLLING_OK")
     except httpx.HTTPError as exc:
         print(f"WARN: bot identity: {exc.__class__.__name__}", file=sys.stderr)
         # Non-fatal — ada-telegram still works without profile update.

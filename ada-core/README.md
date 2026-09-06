@@ -83,6 +83,28 @@ Open WebUI: point API base URL to `http://localhost:8000/v1` and select model `a
 bash ada-core/scripts/diagnose.sh
 ```
 
+### Still no response?
+
+Run the full stack test on HELM — it isolates **each layer**:
+
+```bash
+bash ada-core/scripts/test-ada-stack.sh
+```
+
+| Step fails | Meaning |
+|------------|---------|
+| **D-Bus Think** | Ada Core down or model won't load — not Telegram/OpenClaw |
+| **D-Bus OK, Telegram silent** | `allowFrom` wrong, webhook conflict, or `ada-telegram` down |
+| **send_telegram fails** | Bot token / network |
+| **OpenClaw audit FAIL** | App UI still hits `ollama/qwen3.5:cloud` |
+
+Common silent Telegram fix:
+```bash
+sudo systemctl restart ada-telegram   # clears webhook, starts polling
+```
+
+Send `/start` to the bot — it must reply (even if you're not in allowFrom, it shows your user id).
+
 ### Plugins / per-agent overrides interrupting Ada
 
 OpenClaw can override `openclaw.json` via:
