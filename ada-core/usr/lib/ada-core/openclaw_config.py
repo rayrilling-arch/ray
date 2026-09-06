@@ -16,6 +16,18 @@ def load_openclaw_config() -> dict[str, Any]:
         return json.load(handle)
 
 
+def _parse_allow_from(allow_from: list[object]) -> list[int]:
+    user_ids: list[int] = []
+    for uid in allow_from:
+        try:
+            user_ids.append(int(uid))
+        except (TypeError, ValueError):
+            raise ValueError(
+                f"channels.telegram.allowFrom must be numeric Telegram user IDs; bad entry: {uid!r}"
+            ) from None
+    return user_ids
+
+
 def load_telegram_settings() -> tuple[str, list[int]]:
     cfg = load_openclaw_config()
     channels = cfg.get("channels") or {}
@@ -24,7 +36,7 @@ def load_telegram_settings() -> tuple[str, list[int]]:
     if not token:
         raise ValueError("channels.telegram.botToken missing in OpenClaw config")
     allow_from = telegram.get("allowFrom") or []
-    user_ids = [int(uid) for uid in allow_from]
+    user_ids = _parse_allow_from(list(allow_from))
     if not user_ids:
         raise ValueError("channels.telegram.allowFrom is empty in OpenClaw config")
     return str(token), user_ids

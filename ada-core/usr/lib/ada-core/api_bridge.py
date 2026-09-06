@@ -104,7 +104,13 @@ def chat_completions(request: ChatCompletionRequest) -> JSONResponse:
 
 @app.get("/healthz")
 def healthz() -> dict[str, str]:
-    return {"status": "ok"}
+    try:
+        think("ping", timeout_ms=15_000)
+    except AdaCoreUnavailable:
+        return {"status": "degraded", "ada_core": "unavailable"}
+    except Exception:
+        return {"status": "degraded", "ada_core": "error"}
+    return {"status": "ok", "ada_core": "ready"}
 
 
 def main() -> None:

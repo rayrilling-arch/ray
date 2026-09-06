@@ -74,3 +74,44 @@ Open WebUI: point API base URL to `http://localhost:8000/v1` and select model `a
 
 - Secrets are read from OpenClaw config at runtime; nothing is logged or printed.
 - Telegram inbound is restricted to `channels.telegram.allowFrom` IDs.
+
+## Troubleshooting
+
+### Quick diagnosis (run on HELM)
+
+```bash
+bash ada-core/scripts/diagnose.sh
+```
+
+### "Agent failed before running" (OpenClaw app)
+
+This error comes from the **OpenClaw agent runner**, not from `ada-core` D-Bus.
+
+- **Telegram chat** uses `ada-telegram.service` → D-Bus `Think` (does not use OpenClaw agents).
+- **OpenClaw app/UI** uses `agents.list` and LLM providers — if misconfigured, the app fails before running.
+
+Fix on HELM:
+
+```bash
+sudo ada-core/scripts/handoff-telegram-to-ada.sh   # wires ada agent to http://127.0.0.1:8000/v1
+sudo systemctl restart ada-api-bridge ada-telegram
+```
+
+Ensure `ada-core` and `ada-api-bridge` are active first (`curl http://localhost:8000/v1/models`).
+
+### Telegram: Ada does not see my texts
+
+| Cause | Fix |
+|-------|-----|
+| Wrong user ID in `allowFrom` | Send `/start` to the bot — it replies with your numeric user id |
+| `openclaw-gateway` still polling | `sudo systemctl stop openclaw-gateway` then restart `ada-telegram` |
+| `ada-telegram` not running | `journalctl -u ada-telegram -n 40` |
+| `ada-core` down | User gets "trouble thinking" — fix `journalctl -u ada-core` |
+| Only photos/voice sent | Ada handles **text** only |
+| 409 Conflict in logs | Two services using same bot token — run handoff script |
+
+Full deploy + verify:
+
+```bash
+sudo ada-core/scripts/deploy.sh
+```

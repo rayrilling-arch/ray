@@ -7,7 +7,7 @@ import logging
 import sys
 
 from telegram import Update
-from telegram.ext import Application, ContextTypes, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
 from dbus_client import AdaCoreUnavailable, think
 from openclaw_config import load_telegram_settings
@@ -39,6 +39,24 @@ def _split_message(text: str, limit: int = TELEGRAM_MAX_LEN) -> list[str]:
     return chunks
 
 
+async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.effective_user is None or update.message is None:
+        return
+
+    user_id = update.effective_user.id
+    allowed: set[int] = context.bot_data["allowed_user_ids"]
+    if user_id in allowed:
+        await update.message.reply_text(
+            "Ada is here on HELM. Send me a text message anytime."
+        )
+    else:
+        await update.message.reply_text(
+            f"Hi — I'm Ada. Your Telegram user id is {user_id}. "
+            "If you should reach me, ask Ray to add that number to "
+            "channels.telegram.allowFrom in openclaw.json, then restart ada-telegram."
+        )
+
+
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user is None or update.message is None:
         return
@@ -46,7 +64,15 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     user_id = update.effective_user.id
     allowed: set[int] = context.bot_data["allowed_user_ids"]
     if user_id not in allowed:
-        logger.info("Ignored unauthorized chat user_id=%s", user_id)
+        logger.warning(
+            "Ignored unauthorized user_id=%s (allowed=%s)",
+            user_id,
+            sorted(allowed),
+        )
+        await update.message.reply_text(
+            f"I can't chat with this account yet. Your user id is {user_id}. "
+            "Ray needs to add it to allowFrom."
+        )
         return
 
     text = (update.message.text or "").strip()
@@ -82,6 +108,7 @@ def main() -> int:
         .build()
     )
     app.bot_data["allowed_user_ids"] = set(allowed_user_ids)
+    app.add_handler(CommandHandler("start", handle_start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
 
     app.run_polling(allowed_updates=Update.ALL_TYPES)
