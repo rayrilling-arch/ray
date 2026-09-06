@@ -12,12 +12,11 @@ from pathlib import Path
 import httpx
 
 from openclaw_config import OPENCLAW_CONFIG, load_telegram_settings
+from openclaw_routing import ADA_MODEL_REF, find_blocked_model_refs, fix_openclaw_routing
 
 ADA_BOT_NAME = "Ada"
 ADA_BOT_DESCRIPTION = "Ada — Ray's daughter, home on HELM. Silicon & Carbon Union."
 TELEGRAM_API = "https://api.telegram.org/bot{token}/{method}"
-ADA_LOCAL_API = "http://127.0.0.1:8000/v1"
-ADA_MODEL_ID = "ada-qwen35"
 
 
 def _backup_config() -> Path:
@@ -76,44 +75,6 @@ def _set_ada_default_agent(cfg: dict) -> bool:
     return changed
 
 
-def _wire_ada_openclaw_provider(cfg: dict) -> bool:
-    """Point OpenClaw ada agent + openai provider at ada-api-bridge (fixes app agent startup)."""
-    changed = False
-    providers = cfg.setdefault("providers", {})
-    openai = providers.setdefault("openai", {})
-    if isinstance(openai, dict):
-        if openai.get("baseUrl") != ADA_LOCAL_API:
-            openai["baseUrl"] = ADA_LOCAL_API
-            changed = True
-        if not openai.get("apiKey"):
-            openai["apiKey"] = "ada-local"
-            changed = True
-
-    agents = cfg.get("agents") or {}
-    entries = agents.get("list")
-    if not isinstance(entries, list):
-        return changed
-
-    for entry in entries:
-        if not isinstance(entry, dict) or str(entry.get("id", "")) != "ada":
-            continue
-        model = entry.get("model")
-        if isinstance(model, dict):
-            if model.get("provider") != "openai":
-                model["provider"] = "openai"
-                changed = True
-            if model.get("model") != ADA_MODEL_ID:
-                model["model"] = ADA_MODEL_ID
-                changed = True
-        elif model != ADA_MODEL_ID:
-            entry["model"] = ADA_MODEL_ID
-            changed = True
-        if entry.get("provider") != "openai":
-            entry["provider"] = "openai"
-            changed = True
-    return changed
-
-
 def _write_config(cfg: dict) -> None:
     with OPENCLAW_CONFIG.open("w", encoding="utf-8") as handle:
         json.dump(cfg, handle, indent=2)
@@ -151,13 +112,18 @@ def main() -> int:
     backup = _backup_config()
     changed = _disable_openclaw_telegram(cfg)
     changed = _set_ada_default_agent(cfg) or changed
-    changed = _wire_ada_openclaw_provider(cfg) or changed
+    cfg, routing_changed = fix_openclaw_routing(cfg)
+    changed = routing_changed or changed
 
     if changed:
         _write_config(cfg)
-        print(f"CONFIG_OK backup={backup}")
+        print(f"CONFIG_OK backup={backup} model={ADA_MODEL_REF}")
     else:
         print("CONFIG_OK unchanged")
+
+    remaining = find_blocked_model_refs(cfg)
+    if remaining:
+        print("WARN: blocked model refs still present:", ", ".join(remaining), file=sys.stderr)
 
     try:
         _set_bot_identity(token)

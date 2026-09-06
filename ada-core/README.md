@@ -83,6 +83,27 @@ Open WebUI: point API base URL to `http://localhost:8000/v1` and select model `a
 bash ada-core/scripts/diagnose.sh
 ```
 
+### `ollama/qwen3.5:cloud request failed`
+
+OpenClaw is trying to use **Ollama Cloud**, not Ada on HELM. Ada runs locally via `ada-core` + `ada-api-bridge` at `http://127.0.0.1:8000/v1`.
+
+Fix on HELM:
+
+```bash
+sudo ada-core/scripts/fix-openclaw-ada.sh
+```
+
+This rewires `agents.defaults.model` and the ada agent from `ollama/qwen3.5:cloud` → `openai/ada-qwen35` (local Blackwell).
+
+Prerequisites:
+
+```bash
+systemctl is-active ada-core ada-api-bridge   # both must be active
+curl http://localhost:8000/v1/models          # must list ada-qwen35
+```
+
+Then restart OpenClaw gateway if you use the app UI.
+
 ### "Agent failed before running" (OpenClaw app)
 
 This error comes from the **OpenClaw agent runner**, not from `ada-core` D-Bus.

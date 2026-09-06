@@ -89,20 +89,26 @@ else
     "${VENV}" - <<'PY' 2>/tmp/ada-tg-diag.txt || fail "Telegram config parse failed"
 import json, sys
 from pathlib import Path
+from openclaw_routing import find_blocked_model_refs
 p = Path("/home/adarilling/.openclaw/openclaw.json")
 cfg = json.loads(p.read_text())
 tg = (cfg.get("channels") or {}).get("telegram") or {}
 print("telegram.enabled:", tg.get("enabled"))
 print("allowFrom:", tg.get("allowFrom"))
 print("botToken:", "set" if tg.get("botToken") else "MISSING")
+defaults = (cfg.get("agents") or {}).get("defaults") or {}
+print("agents.defaults.model:", defaults.get("model"))
 agents = (cfg.get("agents") or {}).get("list") or []
 for a in agents:
     if isinstance(a, dict) and a.get("id") in ("ada", "main", "default"):
         print("agent:", a.get("id"), "default=", a.get("default"), "model=", a.get("model"))
-providers = cfg.get("providers") or {}
+providers = (cfg.get("models") or {}).get("providers") or cfg.get("providers") or {}
 for name, prov in providers.items():
     if isinstance(prov, dict) and prov.get("baseUrl"):
-        print("provider", name, "baseUrl=", prov.get("baseUrl"))
+        print("provider", name, "baseUrl=", prov.get("baseUrl"), "api=", prov.get("api"))
+blocked = find_blocked_model_refs(cfg)
+if blocked:
+    print("BLOCKED_MODEL_REFS:", "; ".join(blocked))
 PY
     cat /tmp/ada-tg-diag.txt
     if grep -q "telegram.enabled: False" /tmp/ada-tg-diag.txt 2>/dev/null; then
@@ -112,6 +118,9 @@ PY
     fi
     if grep -q "botToken: MISSING" /tmp/ada-tg-diag.txt; then
       fail "botToken missing in openclaw.json"
+    fi
+    if grep -q "BLOCKED_MODEL_REFS:" /tmp/ada-tg-diag.txt 2>/dev/null; then
+      fail "OpenClaw still points at Ollama Cloud (qwen3.5:cloud) — run: sudo ada-core/scripts/fix-openclaw-ada.sh"
     fi
     if grep -q "allowFrom: \[\]" /tmp/ada-tg-diag.txt || grep -q "allowFrom: None" /tmp/ada-tg-diag.txt; then
       fail "allowFrom empty — ada-telegram will not start"
