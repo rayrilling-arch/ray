@@ -149,6 +149,13 @@ def _rewire_agents(cfg: dict[str, Any]) -> bool:
                 if model_changed:
                     entry["model"] = new_model
                     changed = True
+                elif isinstance(entry.get("model"), str):
+                    model_str = entry["model"]
+                    if _is_blocked_model(model_str) or (
+                        "ollama" in model_str.lower() and model_str != ADA_MODEL_REF
+                    ):
+                        entry["model"] = ADA_MODEL_REF
+                        changed = True
             if agent_id in {"ada", "main", "default"}:
                 if entry.get("provider") != ADA_PROVIDER:
                     entry["provider"] = ADA_PROVIDER

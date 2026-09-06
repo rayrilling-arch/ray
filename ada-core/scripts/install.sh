@@ -23,6 +23,11 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
+if ! id ada >/dev/null 2>&1; then
+  log "ERROR: system user 'ada' does not exist. Create it before install."
+  exit 1
+fi
+
 log "Starting install (backup dir: ${BACKUP_ROOT})"
 
 # --- backups ---
@@ -80,6 +85,11 @@ chmod 0755 /usr/lib/ada-core/supervisor.py \
   /usr/lib/ada-core/wake_ada.py \
   /usr/lib/ada-core/say_to_ada.py
 install -m 0755 "${ROOT}/scripts/hi-ada" /usr/local/bin/hi-ada
+install -m 0755 "${ROOT}/scripts/check-everything.sh" /usr/local/bin/ada-check-everything.sh
+install -m 0755 "${ROOT}/scripts/repair-ada-core.sh" /usr/local/bin/ada-repair-core.sh
+install -m 0755 "${ROOT}/scripts/fix-openclaw-ada.sh" /usr/local/bin/ada-fix-openclaw.sh
+install -m 0755 "${ROOT}/scripts/test-ada-stack.sh" /usr/local/bin/ada-test-stack.sh
+install -m 0755 "${ROOT}/scripts/diagnose.sh" /usr/local/bin/ada-diagnose.sh
 
 # --- venv (create if missing, install deps) ---
 if [[ ! -x /usr/lib/ada-core/venv/bin/python3 ]]; then
@@ -89,6 +99,14 @@ fi
 /usr/lib/ada-core/venv/bin/pip install -q --upgrade pip
 /usr/lib/ada-core/venv/bin/pip install -q -r /usr/lib/ada-core/requirements.txt
 # llama-cpp-python with CUDA must already be present on HELM; do not reinstall blindly.
+if ! /usr/lib/ada-core/venv/bin/python3 -c "from llama_cpp import Llama" 2>/dev/null; then
+  log "ERROR: llama-cpp-python is NOT installed in the venv."
+  log "Ada Core cannot load Qwen 3.5 without it. On HELM, install a CUDA wheel, e.g.:"
+  log "  CMAKE_ARGS=\"-DGGML_CUDA=on\" pip install llama-cpp-python --no-cache-dir"
+  log "Then re-run: sudo ada-core/scripts/install.sh"
+  exit 1
+fi
+log "llama-cpp-python present in venv"
 
 # --- systemd + dbus ---
 install -m 0644 "${ROOT}/etc/systemd/system/ada-core.service" /etc/systemd/system/ada-core.service

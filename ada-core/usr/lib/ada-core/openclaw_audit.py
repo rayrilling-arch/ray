@@ -266,6 +266,7 @@ def _fix_ollama_providers(cfg: dict[str, Any]) -> bool:
         model_entries = provider.get("models")
         if isinstance(model_entries, list):
             kept: list[Any] = []
+            list_changed = False
             for entry in model_entries:
                 model_id = ""
                 if isinstance(entry, dict):
@@ -273,11 +274,12 @@ def _fix_ollama_providers(cfg: dict[str, Any]) -> bool:
                 elif isinstance(entry, str):
                     model_id = entry
                 if ":cloud" in model_id.lower():
-                    changed = True
+                    list_changed = True
                     continue
                 kept.append(entry)
-            if changed:
+            if list_changed:
                 provider["models"] = kept
+                changed = True
 
     return changed
 
