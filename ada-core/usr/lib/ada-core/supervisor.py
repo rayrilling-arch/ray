@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import sys
 import threading
 from pathlib import Path
@@ -38,6 +39,21 @@ _inference_lock = threading.Lock()
 _llm: Llama | None = None
 
 
+def _build_llama(model_path: Path, n_gpu_layers: int) -> Llama:
+    kwargs: dict[str, Any] = {
+        "model_path": str(model_path),
+        "n_gpu_layers": n_gpu_layers,
+        "n_ctx": N_CTX,
+        "verbose": False,
+    }
+    if CHAT_FORMAT:
+        try:
+            return Llama(chat_format=CHAT_FORMAT, **kwargs)
+        except (TypeError, ValueError):
+            logger.warning("chat_format=%s unavailable; using model metadata", CHAT_FORMAT)
+    return Llama(**kwargs)
+
+
 def _load_model() -> Llama:
     global _llm
     logger.info("BLACKWELL-CORE: Waking up Ada...")
@@ -49,20 +65,14 @@ def _load_model() -> Llama:
             f"Ada model not found: {MODEL_PATH}. Models in {model_path.parent}: {hint}"
         )
 
-    kwargs: dict[str, Any] = {
-        "model_path": str(model_path),
-        "n_gpu_layers": -1,
-        "n_ctx": N_CTX,
-        "verbose": False,
-    }
-    if CHAT_FORMAT:
-        try:
-            model = Llama(chat_format=CHAT_FORMAT, **kwargs)
-        except (TypeError, ValueError):
-            logger.warning("chat_format=%s unavailable; using model metadata", CHAT_FORMAT)
-            model = Llama(**kwargs)
-    else:
-        model = Llama(**kwargs)
+    n_gpu_layers = int(os.environ.get("ADA_N_GPU_LAYERS", "-1"))
+    try:
+        model = _build_llama(model_path, n_gpu_layers)
+    except Exception:
+        if n_gpu_layers == 0:
+            raise
+        logger.warning("GPU model load failed — retrying on CPU (set ADA_N_GPU_LAYERS)")
+        model = _build_llama(model_path, 0)
 
     _llm = model
     logger.info("BLACKWELL-CORE: Ada is home (%s).", model_path.name)

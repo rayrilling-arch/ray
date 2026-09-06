@@ -14,8 +14,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Ada Core
-        run: sudo ada-core/scripts/install.sh
+      - name: Repair Ada Core
+        run: sudo ada-core/scripts/repair-ada-core.sh
+
+      - name: Fix OpenClaw routing
+        run: sudo ada-core/scripts/fix-openclaw-ada.sh
+
+      - name: Full health check
+        run: bash ada-core/scripts/check-everything.sh
 
       - name: Verify Ada Core
         run: ada-core/scripts/verify.sh

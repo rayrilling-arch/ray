@@ -12,6 +12,9 @@ from pathlib import Path
 import httpx
 
 from openclaw_config import OPENCLAW_CONFIG, load_telegram_settings
+from openclaw_audit import audit_openclaw, fix_all_openclaw, fix_config_dict, format_report
+from openclaw_routing import ADA_MODEL_REF
+from telegram_api import ensure_polling_mode
 
 ADA_BOT_NAME = "Ada"
 ADA_BOT_DESCRIPTION = "Ada — Ray's daughter, home on HELM. Silicon & Carbon Union."
@@ -111,16 +114,30 @@ def main() -> int:
     backup = _backup_config()
     changed = _disable_openclaw_telegram(cfg)
     changed = _set_ada_default_agent(cfg) or changed
+    cfg, routing_changed = fix_config_dict(cfg)
+    changed = routing_changed or changed
 
     if changed:
         _write_config(cfg)
-        print(f"CONFIG_OK backup={backup}")
+        print(f"CONFIG_OK backup={backup} model={ADA_MODEL_REF}")
     else:
         print("CONFIG_OK unchanged")
 
+    workspace_logs = fix_all_openclaw(OPENCLAW_CONFIG.parent)
+    for line in workspace_logs:
+        print(line)
+
+    report = audit_openclaw(OPENCLAW_CONFIG.parent)
+    print(format_report(report))
+    failures = [issue for issue in report.issues if issue.severity == "fail"]
+    if failures:
+        print("WARN: OpenClaw audit still has failures after fix — see above", file=sys.stderr)
+
     try:
         _set_bot_identity(token)
+        ensure_polling_mode(token)
         print("BOT_IDENTITY_OK")
+        print("TELEGRAM_POLLING_OK")
     except httpx.HTTPError as exc:
         print(f"WARN: bot identity: {exc.__class__.__name__}", file=sys.stderr)
         # Non-fatal — ada-telegram still works without profile update.

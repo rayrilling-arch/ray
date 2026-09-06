@@ -17,8 +17,8 @@ for unit in openclaw-gateway.service openclaw.service clawdbot-gateway.service c
 done
 
 if [[ ! -x "${VENV}" ]]; then
-  log "venv missing — skipping configure (install.sh should create it)"
-  exit 0
+  log "ERROR: venv missing at ${VENV} — run install.sh first"
+  exit 1
 fi
 
 sudo -u "${REAL_USER}" env PYTHONPATH=/usr/lib/ada-core \

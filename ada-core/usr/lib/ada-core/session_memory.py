@@ -28,6 +28,19 @@ def _default_session() -> dict[str, Any]:
     }
 
 
+def _normalize_session(data: Any) -> dict[str, Any]:
+    """Accept canonical session dict or legacy bare messages list."""
+    if isinstance(data, dict):
+        messages = data.get("messages")
+        if isinstance(messages, list):
+            return data
+        raise ValueError("invalid messages array")
+    if isinstance(data, list):
+        logger.warning("Migrating bare messages list to session object")
+        return {"messages": data}
+    raise ValueError("invalid session shape")
+
+
 def load_session() -> dict[str, Any]:
     path = _memory_file()
     if not path.exists():
@@ -37,10 +50,8 @@ def load_session() -> dict[str, Any]:
     try:
         with path.open(encoding="utf-8") as handle:
             data = json.load(handle)
-        if not isinstance(data.get("messages"), list):
-            raise ValueError("invalid messages array")
-        return data
-    except (OSError, json.JSONDecodeError, ValueError) as exc:
+        return _normalize_session(data)
+    except (OSError, json.JSONDecodeError, ValueError, AttributeError, TypeError) as exc:
         logger.warning("Resetting corrupt session memory: %s", exc.__class__.__name__)
         session = _default_session()
         save_session(session)
