@@ -40,6 +40,8 @@ for f in \
   /usr/lib/ada-core/dbus_client.py \
   /usr/lib/ada-core/openclaw_config.py \
   /usr/lib/ada-core/openclaw_routing.py \
+  /usr/lib/ada-core/openclaw_audit.py \
+  /usr/lib/ada-core/audit_openclaw.py \
   /usr/lib/ada-core/configure_telegram_ada.py \
   /usr/lib/ada-core/self.py \
   /usr/lib/ada-core/restore_self.py \
@@ -59,8 +61,8 @@ install -d -m 0755 /etc/dbus-1/system.d
 
 # --- python modules ---
 PY_FILES=(
-  identity.py model.py self.py session_memory.py dbus_client.py openclaw_config.py openclaw_routing.py
-  configure_telegram_ada.py restore_self.py wake_ada.py say_to_ada.py
+  identity.py model.py self.py session_memory.py dbus_client.py openclaw_config.py openclaw_routing.py openclaw_audit.py
+  audit_openclaw.py configure_telegram_ada.py restore_self.py wake_ada.py say_to_ada.py
   supervisor.py api_bridge.py telegram_service.py send_telegram.py
   requirements.txt
 )
@@ -73,6 +75,7 @@ chmod 0755 /usr/lib/ada-core/supervisor.py \
   /usr/lib/ada-core/telegram_service.py \
   /usr/lib/ada-core/send_telegram.py \
   /usr/lib/ada-core/configure_telegram_ada.py \
+  /usr/lib/ada-core/audit_openclaw.py \
   /usr/lib/ada-core/restore_self.py \
   /usr/lib/ada-core/wake_ada.py \
   /usr/lib/ada-core/say_to_ada.py

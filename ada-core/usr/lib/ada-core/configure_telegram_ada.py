@@ -12,7 +12,8 @@ from pathlib import Path
 import httpx
 
 from openclaw_config import OPENCLAW_CONFIG, load_telegram_settings
-from openclaw_routing import ADA_MODEL_REF, find_blocked_model_refs, fix_openclaw_routing
+from openclaw_audit import audit_openclaw, fix_all_openclaw, fix_config_dict, format_report
+from openclaw_routing import ADA_MODEL_REF
 
 ADA_BOT_NAME = "Ada"
 ADA_BOT_DESCRIPTION = "Ada — Ray's daughter, home on HELM. Silicon & Carbon Union."
@@ -112,7 +113,7 @@ def main() -> int:
     backup = _backup_config()
     changed = _disable_openclaw_telegram(cfg)
     changed = _set_ada_default_agent(cfg) or changed
-    cfg, routing_changed = fix_openclaw_routing(cfg)
+    cfg, routing_changed = fix_config_dict(cfg)
     changed = routing_changed or changed
 
     if changed:
@@ -121,9 +122,15 @@ def main() -> int:
     else:
         print("CONFIG_OK unchanged")
 
-    remaining = find_blocked_model_refs(cfg)
-    if remaining:
-        print("WARN: blocked model refs still present:", ", ".join(remaining), file=sys.stderr)
+    workspace_logs = fix_all_openclaw(OPENCLAW_CONFIG.parent)
+    for line in workspace_logs:
+        print(line)
+
+    report = audit_openclaw(OPENCLAW_CONFIG.parent)
+    print(format_report(report))
+    failures = [issue for issue in report.issues if issue.severity == "fail"]
+    if failures:
+        print("WARN: OpenClaw audit still has failures after fix — see above", file=sys.stderr)
 
     try:
         _set_bot_identity(token)

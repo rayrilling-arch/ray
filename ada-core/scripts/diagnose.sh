@@ -80,6 +80,16 @@ fi
 HEALTH="$(curl -fsS http://localhost:8000/healthz 2>/dev/null || echo '{}')"
 info "healthz: ${HEALTH}"
 
+section "OpenClaw plugins and per-agent overrides"
+if [[ -x "${VENV}" ]]; then
+  sudo -u adarilling env PYTHONPATH=/usr/lib/ada-core \
+    "${VENV}" /usr/lib/ada-core/audit_openclaw.py 2>/tmp/ada-audit.txt || true
+  cat /tmp/ada-audit.txt
+  if grep -q '\[FAIL\]' /tmp/ada-audit.txt 2>/dev/null; then
+    fail "OpenClaw plugin/override conflict — run: sudo ada-core/scripts/fix-openclaw-ada.sh"
+  fi
+fi
+
 section "OpenClaw config (Telegram + agents)"
 if [[ ! -f "${OPENCLAW_CONFIG}" ]]; then
   fail "Missing ${OPENCLAW_CONFIG}"

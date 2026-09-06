@@ -83,6 +83,21 @@ Open WebUI: point API base URL to `http://localhost:8000/v1` and select model `a
 bash ada-core/scripts/diagnose.sh
 ```
 
+### Plugins / per-agent overrides interrupting Ada
+
+OpenClaw can override `openclaw.json` via:
+
+- `plugins.entries.ollama` (auto-discovery adds `qwen3.5:cloud`)
+- `~/.openclaw/workspace/agents/<name>/models.json` (per-agent brain override)
+
+Audit and fix:
+
+```bash
+sudo ada-core/scripts/fix-openclaw-ada.sh
+# or:
+python3 /usr/lib/ada-core/audit_openclaw.py --fix
+```
+
 ### `ollama/qwen3.5:cloud request failed`
 
 OpenClaw is trying to use **Ollama Cloud**, not Ada on HELM. Ada runs locally via `ada-core` + `ada-api-bridge` at `http://127.0.0.1:8000/v1`.

@@ -28,6 +28,9 @@ fi
 
 REAL_USER="${SUDO_USER:-adarilling}"
 sudo -u "${REAL_USER}" env PYTHONPATH=/usr/lib/ada-core \
+  "${VENV}" /usr/lib/ada-core/audit_openclaw.py --fix || true
+
+sudo -u "${REAL_USER}" env PYTHONPATH=/usr/lib/ada-core \
   "${VENV}" /usr/lib/ada-core/configure_telegram_ada.py
 
 for unit in openclaw-gateway.service openclaw.service; do
